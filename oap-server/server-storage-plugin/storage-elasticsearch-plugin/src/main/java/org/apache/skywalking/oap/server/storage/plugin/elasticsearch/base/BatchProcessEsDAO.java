@@ -18,42 +18,40 @@
 
 package org.apache.skywalking.oap.server.storage.plugin.elasticsearch.base;
 
-import java.util.List;
 import org.apache.skywalking.oap.server.core.storage.IBatchDAO;
 import org.apache.skywalking.oap.server.library.client.elasticsearch.ElasticSearchClient;
-import org.apache.skywalking.oap.server.library.client.request.*;
+import org.apache.skywalking.oap.server.library.client.request.InsertRequest;
+import org.apache.skywalking.oap.server.library.client.request.PrepareRequest;
 import org.apache.skywalking.oap.server.library.util.CollectionUtils;
-import org.elasticsearch.action.bulk.*;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.slf4j.*;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author peng-yongsheng
  */
 public class BatchProcessEsDAO extends EsDAO implements IBatchDAO {
 
-    private static final Logger logger = LoggerFactory.getLogger(BatchProcessEsDAO.class);
-
     private BulkProcessor bulkProcessor;
-    private final int bulkActions;
-    private final int flushInterval;
-    private final int concurrentRequests;
 
     public BatchProcessEsDAO(ElasticSearchClient client, int bulkActions, int flushInterval,
         int concurrentRequests) {
         super(client);
-        this.bulkActions = bulkActions;
-        this.flushInterval = flushInterval;
-        this.concurrentRequests = concurrentRequests;
+        this.bulkProcessor = new BulkProcessor(bulkActions, flushInterval, concurrentRequests);
     }
 
-    @Override public void asynchronous(InsertRequest insertRequest) {
-        if (bulkProcessor == null) {
-            this.bulkProcessor = getClient().createBulkProcessor(bulkActions, flushInterval, concurrentRequests);
+    @Override public void asynchronous(InsertRequest insertRequest) throws IOException {
+        if (bulkProcessor.getClient() == null) {
+            bulkProcessor.setClient(getClient().getClient());
         }
-
-        this.bulkProcessor.add((IndexRequest)insertRequest);
+        try {
+            bulkProcessor.add(insertRequest);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override public void synchronous(List<PrepareRequest> prepareRequests) {

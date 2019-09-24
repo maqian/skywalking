@@ -19,6 +19,7 @@
 package org.apache.skywalking.apm.webapp.proxy;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -30,25 +31,31 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 public class MvcConfig extends WebMvcConfigurerAdapter {
 
+    private static final String PUBLIC_PATH = "/skywalking";
+
+    @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+    }
+
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry
-                .addResourceHandler("/index.html")
+                .addResourceHandler(PUBLIC_PATH + "/index.html")
                 .addResourceLocations("classpath:/public/index.html");
         registry
-                .addResourceHandler("/css/**")
+                .addResourceHandler(PUBLIC_PATH + "/css/**")
                 .addResourceLocations("classpath:/public/css/");
         registry
-                .addResourceHandler("/img/**")
+                .addResourceHandler(PUBLIC_PATH + "/img/**")
                 .addResourceLocations("classpath:/public/img/");
         registry
-                .addResourceHandler("/js/**")
+                .addResourceHandler(PUBLIC_PATH + "/js/**")
                 .addResourceLocations("classpath:/public/js/");
         registry
-                .addResourceHandler("/favicon.ico")
+                .addResourceHandler(PUBLIC_PATH + "/favicon.ico")
                 .addResourceLocations("classpath:/public/favicon.ico");
         registry
-                .addResourceHandler("/logo.png")
+                .addResourceHandler(PUBLIC_PATH + "/logo.png")
                 .addResourceLocations("classpath:/public/logo.png");
     }
 }

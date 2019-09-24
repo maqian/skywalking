@@ -38,6 +38,8 @@ import org.elasticsearch.action.get.*;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.support.*;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.*;
 import org.elasticsearch.common.unit.TimeValue;
@@ -65,6 +67,10 @@ public class ElasticSearchClient implements Client {
         this.namespace = namespace;
         this.user = user;
         this.password = password;
+    }
+
+    public RestHighLevelClient getClient() {
+        return client;
     }
 
     @Override public void connect() throws IOException {
@@ -156,8 +162,7 @@ public class ElasticSearchClient implements Client {
             indexName = formatIndexName(indexName);
         }
         DeleteIndexRequest request = new DeleteIndexRequest(indexName);
-        DeleteIndexResponse response;
-        response = client.indices().delete(request);
+        AcknowledgedResponse response = client.indices().delete(request, RequestOptions.DEFAULT);
         logger.debug("delete {} index finished, isAcknowledged: {}", indexName, response.isAcknowledged());
         return response.isAcknowledged();
     }

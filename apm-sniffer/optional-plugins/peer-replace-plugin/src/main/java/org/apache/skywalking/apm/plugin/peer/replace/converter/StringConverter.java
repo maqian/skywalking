@@ -16,18 +16,26 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.storage;
+package org.apache.skywalking.apm.plugin.peer.replace.converter;
 
-import java.io.IOException;
-import java.util.List;
-import org.apache.skywalking.oap.server.library.client.request.*;
+import java.util.regex.Pattern;
 
 /**
- * @author peng-yongsheng
+ * 
+ * @author Ma Qian(maqian258@gmail.com)
+ * @date 2019-08-11 12:22
+ * @version V1.0
  */
-public interface IBatchDAO extends DAO {
+public class StringConverter {
+    private Pattern matchPattern;
+    private String replacement;
 
-    void asynchronous(InsertRequest insertRequest) throws IOException;
+    public StringConverter(String matchPattern, String replacement) {
+        this.matchPattern = Pattern.compile(matchPattern);
+        this.replacement = replacement;
+    }
 
-    void synchronous(List<PrepareRequest> prepareRequests);
+    public String convert(String input) {
+        return matchPattern.matcher(input).replaceAll(replacement);
+    }
 }

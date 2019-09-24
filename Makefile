@@ -50,21 +50,28 @@ TAG?=latest
 
 docker: build.docker docker.all
 
-DOCKER_TARGETS:=docker.oap docker.ui
+DOCKER_TARGETS:=docker.oap docker.ui docker.agent
 
 docker.all: $(DOCKER_TARGETS)
 
+docker.oap: NAME:=skywalking-oap
 docker.oap: $(SW_OUT)/apache-skywalking-apm-bin.tar.gz
 docker.oap: $(SW_ROOT)/docker/oap/Dockerfile.oap
 docker.oap: $(SW_ROOT)/docker/oap/docker-entrypoint.sh
 docker.oap: $(SW_ROOT)/docker/oap/log4j2.xml
-		$(DOCKER_RULE)
+		$(BUILD_RULE)
 
+docker.ui: NAME:=skywalking-ui
 docker.ui: $(SW_OUT)/apache-skywalking-apm-bin.tar.gz
 docker.ui: $(SW_ROOT)/docker/ui/Dockerfile.ui
 docker.ui: $(SW_ROOT)/docker/ui/docker-entrypoint.sh
 docker.ui: $(SW_ROOT)/docker/ui/logback.xml
-		$(DOCKER_RULE)
+		$(BUILD_RULE)
+
+docker.agent: NAME:=skywalking-agent
+docker.agent: $(SW_OUT)/apache-skywalking-apm-bin.tar.gz
+docker.agent: $(SW_ROOT)/docker/agent/Dockerfile.agent
+		$(BUILD_RULE)
 
 
 # $@ is the name of the target
@@ -77,7 +84,7 @@ docker.ui: $(SW_ROOT)/docker/ui/logback.xml
 # 4. This rule runs $(BUILD_PRE) prior to any docker build and only if specified as a dependency variable
 # 5. This rule finally runs docker build passing $(BUILD_ARGS) to docker if they are specified as a dependency variable
 
-DOCKER_RULE=time (mkdir -p $(DOCKER_BUILD_TOP)/$@ && cp -r $^ $(DOCKER_BUILD_TOP)/$@ && cd $(DOCKER_BUILD_TOP)/$@ && $(BUILD_PRE) docker build $(BUILD_ARGS) -t $(HUB)/$(subst docker.,,$@):$(TAG) -f Dockerfile$(suffix $@) .)
+BUILD_RULE=time (mkdir -p $(DOCKER_BUILD_TOP)/$@ && cp -r $^ $(DOCKER_BUILD_TOP)/$@ && cd $(DOCKER_BUILD_TOP)/$@ && $(BUILD_PRE) docker build $(BUILD_ARGS) -t $(HUB)/$(NAME):$(TAG) -f Dockerfile$(suffix $@) .)
 
 # for each docker.XXX target create a push.docker.XXX target that pushes
 # the local docker image to another hub

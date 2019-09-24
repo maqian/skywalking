@@ -41,6 +41,7 @@ public class ContextManager implements BootService {
     private static ThreadLocal<AbstractTracerContext> CONTEXT = new ThreadLocal<AbstractTracerContext>();
     private static ThreadLocal<RuntimeContext> RUNTIME_CONTEXT = new ThreadLocal<RuntimeContext>();
     private static ContextManagerExtendService EXTEND_SERVICE;
+    private static PeerService PEER_SERVICE;
 
     private static AbstractTracerContext getOrCreate(String operationName, boolean forceSampling) {
         AbstractTracerContext context = CONTEXT.get();
@@ -54,9 +55,6 @@ public class ContextManager implements BootService {
                 if (RemoteDownstreamConfig.Agent.SERVICE_ID != DictionaryUtil.nullValue()
                     && RemoteDownstreamConfig.Agent.SERVICE_INSTANCE_ID != DictionaryUtil.nullValue()
                 ) {
-                    if (EXTEND_SERVICE == null) {
-                        EXTEND_SERVICE = ServiceManager.INSTANCE.findService(ContextManagerExtendService.class);
-                    }
                     context = EXTEND_SERVICE.createTraceContext(operationName, forceSampling);
                 } else {
                     /**
@@ -112,14 +110,16 @@ public class ContextManager implements BootService {
             throw new IllegalArgumentException("ContextCarrier can't be null.");
         }
         AbstractTracerContext context = getOrCreate(operationName, false);
-        AbstractSpan span = context.createExitSpan(operationName, remotePeer);
+        String replacedRemotePeer = PEER_SERVICE.replaceRemotePeer(operationName, remotePeer);
+        AbstractSpan span = context.createExitSpan(operationName, replacedRemotePeer);
         context.inject(carrier);
         return span;
     }
 
     public static AbstractSpan createExitSpan(String operationName, String remotePeer) {
         AbstractTracerContext context = getOrCreate(operationName, false);
-        AbstractSpan span = context.createExitSpan(operationName, remotePeer);
+        String replacedRemotePeer = PEER_SERVICE.replaceRemotePeer(operationName, remotePeer);
+        AbstractSpan span = context.createExitSpan(operationName, replacedRemotePeer);
         return span;
     }
 
@@ -194,6 +194,8 @@ public class ContextManager implements BootService {
 
     @Override
     public void boot() {
+        EXTEND_SERVICE = ServiceManager.INSTANCE.findService(ContextManagerExtendService.class);
+        PEER_SERVICE = ServiceManager.INSTANCE.findService(PeerService.class);
     }
 
     @Override

@@ -16,18 +16,19 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.storage;
+package org.apache.skywalking.apm.plugin.peer.replace.conf;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
-import org.apache.skywalking.oap.server.library.client.request.*;
 
 /**
- * @author peng-yongsheng
+ * 
+ * @author Ma Qian(maqian258@gmail.com)
+ * @date 2019-08-11 09:54
+ * @version V1.0
  */
-public interface IBatchDAO extends DAO {
-
-    void asynchronous(InsertRequest insertRequest) throws IOException;
-
-    void synchronous(List<PrepareRequest> prepareRequests);
+public class ReplaceConfig {
+    public static class Peer {
+        public static List<String> REPLACE_PATTERNS = Collections.EMPTY_LIST;
+    }
 }

@@ -1,0 +1,17 @@
+FROM hub.shuyun.com/base/java:oracle-java-8-jdk-origin
+
+ENV SW_VERSION=6.3.0 \
+    SW_AGENT_PATH=/agent
+
+COPY apache-skywalking-apm-bin.tar.gz /
+
+RUN set -ex \
+  && tar -xzf apache-skywalking-apm-bin.tar.gz \
+  && mv /apache-skywalking-apm-bin/agent / \
+  && rm -rf apache-skywalking-apm-bin apache-skywalking-apm-bin.tar.gz \
+  && pwd && ls -al && ls -al /agent && ls -al /agent/optional-plugins \
+  && cp -f /agent/optional-plugins/apm-trace-ignore-plugin-${SW_VERSION}.jar /agent/plugins \
+  && cp -f /agent/optional-plugins/apm-peer-replace-plugin-${SW_VERSION}.jar /agent/plugins \
+  && rm -rf /usr/local/bin/java \
+  && curl -sSL 'https://raw.githubusercontent.com/maqian/toolbox/master/sysfree/install-ejava' | sh
+

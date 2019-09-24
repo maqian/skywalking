@@ -16,18 +16,13 @@
  *
  */
 
-package org.apache.skywalking.oap.server.core.storage;
-
-import java.io.IOException;
-import java.util.List;
-import org.apache.skywalking.oap.server.library.client.request.*;
-
+package org.apache.skywalking.apm.plugin.peer.replace.converter;
 /**
- * @author peng-yongsheng
+ * 
+ * @author Ma Qian(maqian258@gmail.com)
+ * @date 2019-08-11 11:24
+ * @version V1.0
  */
-public interface IBatchDAO extends DAO {
-
-    void asynchronous(InsertRequest insertRequest) throws IOException;
-
-    void synchronous(List<PrepareRequest> prepareRequests);
+public interface PeerConverter {
+    String convert(String operationName, String remotePeer);
 }
